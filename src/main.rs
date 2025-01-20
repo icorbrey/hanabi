@@ -1,8 +1,9 @@
-use bevy::prelude::*;
+// Disable console on Windows for non-dev builds
+#![cfg_attr(not(feature = "dev"), windows_subsystem = "windows")]
 
-fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins)
-        .add_plugins(DefaultPickingPlugins)
-        .run();
+use bevy::prelude::*;
+use hanabi::AppPlugin;
+
+fn main() -> AppExit {
+    App::new().add_plugins(AppPlugin).run()
 }

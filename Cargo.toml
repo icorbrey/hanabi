@@ -3,8 +3,29 @@ name = "hanabi"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+name = "hanabi"
+path = "src/lib.rs"
+
+[[bin]]
+name = "hanabi_bin"
+path = "src/main.rs"
+
 [dependencies]
-bevy = { version = "*", features = ["dynamic_linking"] }
+bevy = "0.15"
+
+# Improve compile times for dev builds by linking Bevy as a dynamic library.
+# For native dev builds, enable asset and embedded asset hot reloading.
+[features]
+default = ["dev-native"]
+dev = ["bevy/dynamic_linking", "bevy/bevy_dev_tools"]
+dev-native = ["dev", "bevy/file_watcher", "bevy/embedded_watcher"]
+
+# Allow long argument lists and overly complex types. Bevy frequently triggers
+# these lints due to dependency injection.
+[lints.clippy]
+too_many_arguments = "allow"
+type_complexity = "allow"
 
 # Enable small optimizations for local code
 [profile.dev]
@@ -13,3 +34,20 @@ opt-level = 1
 # Enable high optimizations for dependencies
 [profile.dev.package."*"]
 opt-level = 3
+
+# Remove expensive debug debug-assertions
+[profile.dev.package.wgpu-types]
+debug-assertions = false
+
+# Optimize for WASM targets, meaning small file size and runtime performance.
+[profile.release]
+codegen-units = 1
+lto = "thin"
+opt-level = "s"
+strip = "debuginfo"
+
+# Optimize for native targets, meaning pure runtime performance.
+[profile.release-native]
+inherits = "release"
+opt-level = 3
+strip = "none"
